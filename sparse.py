@@ -1,12 +1,7 @@
-# Standard library imports
 import sys
-
-# Third party imports
 import cv2
 import numpy as np
-
-# Local imports
-import helper
+import helper # local py file
 
 # TODO: to use argparse instead
 if len(sys.argv) != 2:
@@ -14,8 +9,12 @@ if len(sys.argv) != 2:
     exit()
 
 # Parameters for Shi-Tomasi
-feature_params = dict(maxCorners=300, qualityLevel=0.2, minDistance=2,
-        blockSize=7)
+feature_params = dict(
+    maxCorners=300,
+    qualityLevel=0.2,
+    minDistance=2,
+    blockSize=5
+    )
 
 # Parameters for Lucas-Kanade
 lk_params = dict(winSize=(15,15), maxLevel=2, criteria=(cv2.TERM_CRITERIA_EPS|cv2.TERM_CRITERIA_COUNT, 10, 0.03))
@@ -42,8 +41,12 @@ first_frame = helper.crop_image(first_frame)
 # cv2.imshow('cropped image', cropped)
 # cv2.waitKey(0)
  
-# Convert first frame to grayscale
-prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+# Convert first frame to grayscale - switched for HSV
+# prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+
+#Convert to HSV --> Hue
+prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2HSV)
+prev_gray = prev_gray[:,:,0]
 
 # Applying Shi Tomasi
 prev = cv2.goodFeaturesToTrack(prev_gray, mask=None, **feature_params)
@@ -62,7 +65,11 @@ while(cap.isOpened()):
     frame = helper.crop_image(frame)
 
     # Convert each frame to grayscale
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    #Convert to HSV --> Hue
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    gray = gray[:,:,0]
 
     # Calculate sparse optical flow using LK method
     nextPts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, gray, prev, None, **lk_params)
@@ -81,6 +88,7 @@ while(cap.isOpened()):
     good_new = nextPts[status==1]
 
     # Draw optical flow
+    mask = np.zeros_like(first_frame)
     for i, (new, old) in enumerate(zip(good_new, good_old)):
         # Contiguous flattend array for new points
         a, b = new.ravel()
@@ -89,10 +97,10 @@ while(cap.isOpened()):
         c, d = old.ravel()
 
         # Draws line between old and new positions with green color and 2 thickness
-        mask = cv2.line(mask, (a, b), (c, d), color, 2)
+        mask = cv2.line(mask, (int(a), int(b)), (int(c), int(d)), color, 2)
 
         # Draws filled circle of thickness -1 at new position with green color
-        frame = cv2.circle(frame, (a, b), 3, color, -1)
+        frame = cv2.circle(frame, (int(a), int(b)), 3, color, -1)
 
     # Overlay optical flow on original frame
     output = cv2.add(frame, mask)

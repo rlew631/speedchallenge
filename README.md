@@ -1,4 +1,10 @@
-rlew631's attempt
+rlew631 attempt:
+- figure out how to mask out the sky. no useful data from there...
+- figure out how to mask out the hood of the car
+- can I run a side by side comparison of the grey and HSV together?
+- can I do some sort of image sharpening or cartoonifying preprocessing that would help with picking useful points?
+- use a gaussian blur prefilter see [this paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3478865/). Then find a way to quantify the effectiveness of the different filter parameters
+
 
 Checkout our current challenge
 ======
